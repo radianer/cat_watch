@@ -1,1 +1,4 @@
 opencv-contrib-python
+flask
+numpy
+imutils

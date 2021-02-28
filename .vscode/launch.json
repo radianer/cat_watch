@@ -16,7 +16,7 @@
             "type": "python",
             "request": "launch",
             "cwd": "${workspaceFolder}/cam_modul",
-            "program": "${workspaceFolder}/cam_modul/cam_cat_watch/__init__.py",
+            "program": "${workspaceFolder}/cam_modul/main.py",
             "console": "integratedTerminal"
         }
     ]

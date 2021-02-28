@@ -1,10 +1,23 @@
+"""
+@author Radianer
+"""
 import cv2 as cv
 
-cap = cv.VideoCapture(0)
 
-while(True):
-    ret, frame = cap.read()
+class CamCatWatch:
+    
+    def __init__(self, cap):
+        self.cap = cap
+        pass
 
-    cv.imshow("vid", frame)
-
-    if cv.waitKey(1) == ord("s")
+    def gen_frames(self):
+        while True:
+            ret, frame = self.cap.read()
+            if not ret:
+                print("Fail to read frame")
+                break
+            ret, buffer = cv.imencode(".jpg", frame)
+            frame = buffer.tobytes()
+            yield(b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        pass
