@@ -27,19 +27,17 @@ class CamCatWindow:
                 self.set_org_image(self.cam_cat_client.output_org)
         
             if self.cam_cat_client.output_delta is not None:
-                # cv.imshow("delta", client.output_delta)
-                pass
+                self.set_delta_image(self.cam_cat_client.output_delta)
             
             if self.cam_cat_client.output_detect is not None:
-                # cv.imshow("detect", client.output_detect)
+                self.set_detect_image(self.cam_cat_client.output_detect)
                 pass
+            if self.cam_cat_client.output_thresh is not None:
+                self.set_thresh_image(self.cam_cat_client.output_thresh)
             pass
 
     def set_org_image(self, img):
-        img = imutils.resize(img, width=400)
-        img = imutils.opencv2matplotlib(img)
-        img = Image.fromarray(img)
-        img = ImageTk.PhotoImage(img)
+        img = self.convert_image(img)
 
         if self.label_org is None:
             self.label_org = tki.Label(image=img)
@@ -51,20 +49,53 @@ class CamCatWindow:
         pass
 
     def set_detect_image(self, img):
+        img = self.convert_image(img)
+
+        if self.label_detect is None:
+            self.label_detect = tki.Label(image=img)
+            self.label_detect.image = img
+            self.label_detect.grid(row=0, column=1, padx='5', pady='5', sticky='ew')
+        else:
+            self.label_detect.configure(image=img)
+            self.label_detect.image = img
         pass
 
     def set_delta_image(self, img):
+        img = self.convert_image(img)
+
+        if self.label_delta is None:
+            self.label_delta = tki.Label(image=img)
+            self.label_delta.image = img
+            self.label_delta.grid(row=1, column=0, padx='5', pady='5', sticky='ew')
+        else:
+            self.label_delta.configure(image=img)
+            self.label_delta.image = img
         pass
 
     def set_thresh_image(self, img):
+        img = self.convert_image(img)
+
+        if self.label_thresh is None:
+            self.label_thresh = tki.Label(image=img)
+            self.label_thresh.image = img
+            self.label_thresh.grid(row=1, column=1, padx='5', pady='5', sticky='ew')
+        else:
+            self.label_thresh.configure(image=img)
+            self.label_thresh.image = img
         pass
 
-    def set_label(self, label, img):
-        pass
+    def convert_image(self, img):
+        img = imutils.resize(img, width=800)
+        img = imutils.opencv2matplotlib(img)
+        img = Image.fromarray(img)
+        img = ImageTk.PhotoImage(img)
+        return img
 
 
     def on_close(self):
-        pass
+        self.is_run = False
+        self.cam_cat_client.stop()
+        self.root.quit()
 
     def start(self):
         self.loop_thread.start()

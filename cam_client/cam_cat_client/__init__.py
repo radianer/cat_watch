@@ -30,7 +30,7 @@ class CamCatClient:
         self.client.loop_stop()
 
     def on_message(self, client, userdata, msg):
-        global MQTT_TOPIC_ORG, MQTT_TOPIC_DELTA, MQTT_TOPIC_DETECT
+        global MQTT_TOPIC_ORG, MQTT_TOPIC_DELTA, MQTT_TOPIC_DETECT, MQTT_TOPIC_THRESH
 
         img = base64.b64decode(msg.payload)
         npimg = np.frombuffer(img, dtype=np.uint8)
@@ -46,8 +46,9 @@ class CamCatClient:
             self.output_thresh = frame.copy()
 
     def on_connect(self, client, userdata, flags, rc):
-        global MQTT_TOPIC_ORG, MQTT_TOPIC_DELTA, MQTT_TOPIC_DETECT
+        global MQTT_TOPIC_ORG, MQTT_TOPIC_DELTA, MQTT_TOPIC_DETECT, MQTT_TOPIC_THRESH
         print("Connect")
         client.subscribe(MQTT_TOPIC_ORG)
         client.subscribe(MQTT_TOPIC_DELTA)
         client.subscribe(MQTT_TOPIC_DETECT)
+        client.subscribe(MQTT_TOPIC_THRESH)
