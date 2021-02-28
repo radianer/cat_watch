@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "/usr/bin/python3",
+    "python.pythonPath": "C:\\Users\\Radianer\\AppData\\Local\\Programs\\Python\\Python38\\python.exe",
     "python.languageServer": "Pylance",
-    "python.analysis.extraPaths": ["cam_modul"]
+    "python.analysis.extraPaths": ["cam_modul", "cam_client"]
 }

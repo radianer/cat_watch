@@ -2,7 +2,6 @@
 @author Radianer
 """
 from cam_cat_watch import CamCatWatch
-from cam_cat_server import CamCatServer
 import cv2 as cv
 
 CAM_ID = 0
