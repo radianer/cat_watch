@@ -52,3 +52,15 @@ class CamCatClient:
         client.subscribe(MQTT_TOPIC_DELTA)
         client.subscribe(MQTT_TOPIC_DETECT)
         client.subscribe(MQTT_TOPIC_THRESH)
+    
+    def get_org(self):
+        return self.output_org
+    
+    def get_delta(self):
+        return self.output_delta
+    
+    def get_detect(self):
+        return self.output_detect
+    
+    def get_thresh(self):
+        return self.output_thresh

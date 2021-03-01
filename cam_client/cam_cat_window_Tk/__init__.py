@@ -5,7 +5,7 @@ import tkinter as tki
 import threading
 import imutils
 
-class CamCatWindow:
+class CamCatWindowTk:
 
     def __init__(self, cam_cat_client):
         self.cam_cat_client = cam_cat_client
