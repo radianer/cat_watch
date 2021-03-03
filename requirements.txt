@@ -1,6 +1,7 @@
-opencv-contrib-python
+python3-opencv
 flask
 numpy
 imutils
 paho-mqtt
 pillow
+kivy
