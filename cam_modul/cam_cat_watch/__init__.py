@@ -1,16 +1,21 @@
 """
 @author Radianer
 """
+import numpy as np
 import cv2 as cv
 import threading
 import paho.mqtt.client as mqtt
 import base64
 import imutils
+import json
 
-MQTT_TOPIC_ORG = "front/door/org"
-MQTT_TOPIC_DELTA = "front/door/delta"
-MQTT_TOPIC_DETECT = "front/door/detect"
-MQTT_TOPIC_THRESH = "front/door/thresh"
+MQTT_DOOR_PREFIX = "back"
+
+MQTT_TOPIC_ORG = MQTT_DOOR_PREFIX + "/door/org"
+MQTT_TOPIC_DELTA = MQTT_DOOR_PREFIX + "/door/delta"
+MQTT_TOPIC_DETECT = MQTT_DOOR_PREFIX + "/door/detect"
+MQTT_TOPIC_THRESH = MQTT_DOOR_PREFIX + "/door/thresh"
+MQTT_TOPIC_BOXES = MQTT_DOOR_PREFIX + "/door/boxes"
 
 class CamCatWatch:
     
@@ -39,7 +44,7 @@ class CamCatWatch:
             if not ret:
                 print("Fail to read")
                 continue
-            self.send(MQTT_TOPIC_ORG, frame.copy())
+            self.send_img(MQTT_TOPIC_ORG, frame.copy())
             self.motion_detection(frame)
 
     def motion_detection(self, frame):
@@ -52,26 +57,36 @@ class CamCatWatch:
             return
         
         frame_delta = cv.absdiff(self.lastFrame, gray_img)
-        self.send(MQTT_TOPIC_DELTA, frame_delta)
+        self.send_img(MQTT_TOPIC_DELTA, frame_delta)
         _, thresh = cv.threshold(frame_delta, 25, 255, cv.THRESH_BINARY)
 
         thresh = cv.dilate(thresh, None, iterations=2)
-        self.send(MQTT_TOPIC_THRESH, thresh)
+        self.send_img(MQTT_TOPIC_THRESH, thresh)
 
         cnts = cv.findContours(thresh.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
         cnts = imutils.grab_contours(cnts)
         
+        rects = []
         for c in cnts:
             if cv.contourArea(c) < self.min_area:
                 continue
             
             (x, y, w, h) = cv.boundingRect(c)
             cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-        
-        self.send(MQTT_TOPIC_DETECT, frame)
+            rects.append([x, y, x+w, y+h])
+
+        self.send_array(MQTT_TOPIC_BOXES, rects)
+        self.send_img(MQTT_TOPIC_DETECT, frame)
         self.lastFrame = gray_img
 
-    def send(self, topic, frame):
+    def send_array(self, topic, array):
+        if len(array) > 0:
+            a = np.array(array)
+            l = a.tolist()
+            dump = json.dumps(array)
+            self.client.publish(topic, array)
+
+    def send_img(self, topic, frame):
         ret, buffer = cv.imencode(".jpg", frame)
         if not ret:
             print("Fail to encode")

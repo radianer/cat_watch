@@ -12,10 +12,13 @@ MIN_AREA = 200
 
 if __name__ == "__main__":
     while True:
-        try:
-            print("start")
-            cat_watcher = CamCatWatch(CAM_ID, FRAME_RESOLUTION, MQTT_BROKER, MIN_AREA)
-            cat_watcher.start()
-        except:
-            print("Exception")
-            print(sys.exc_info()[0])
+        print("start")
+        cat_watcher = CamCatWatch(CAM_ID, FRAME_RESOLUTION, MQTT_BROKER, MIN_AREA)
+        cat_watcher.start()
+        # try:
+        #     print("start")
+        #     cat_watcher = CamCatWatch(CAM_ID, FRAME_RESOLUTION, MQTT_BROKER, MIN_AREA)
+        #     cat_watcher.start()
+        # except:
+        #     print("Exception")
+        #     print(sys.exc_info()[0])
