@@ -2,11 +2,17 @@ import cv2 as cv
 import base64
 import paho.mqtt.client as mqtt
 import numpy as np
+import json
+import time
 
-MQTT_TOPIC_ORG = "front/door/org"
-MQTT_TOPIC_DETECT = "front/door/detect"
-MQTT_TOPIC_DELTA = "front/door/delta"
-MQTT_TOPIC_THRESH = "front/door/thresh"
+MQTT_DOOR_PREFIX = "back"
+
+MQTT_TOPIC_ORG = MQTT_DOOR_PREFIX + "/door/org"
+MQTT_TOPIC_DELTA = MQTT_DOOR_PREFIX + "/door/delta"
+MQTT_TOPIC_DETECT = MQTT_DOOR_PREFIX + "/door/detect"
+MQTT_TOPIC_THRESH = MQTT_DOOR_PREFIX + "/door/thresh"
+MQTT_TOPIC_BOXES = MQTT_DOOR_PREFIX + "/door/boxes"
+MQTT_TOPIC_CALIBRATE = MQTT_DOOR_PREFIX + "/door/calibrate"
 
 class CamCatClient:
 
@@ -29,29 +35,43 @@ class CamCatClient:
     def stop(self):
         self.client.loop_stop()
 
-    def on_message(self, client, userdata, msg):
-        global MQTT_TOPIC_ORG, MQTT_TOPIC_DELTA, MQTT_TOPIC_DETECT, MQTT_TOPIC_THRESH
+    def send_calibrate(self):
+        global MQTT_TOPIC_CALIBRATE
+        self.client.publish(MQTT_TOPIC_CALIBRATE, None)
 
+    def on_message(self, client, userdata, msg):
+        global MQTT_TOPIC_ORG, MQTT_TOPIC_DELTA, MQTT_TOPIC_DETECT, MQTT_TOPIC_THRESH, MQTT_TOPIC_BOXES
+
+        start = time.time()
+        if msg.topic == MQTT_TOPIC_BOXES:
+            self.on_boxes(msg.payload)
+            return
+        
         img = base64.b64decode(msg.payload)
         npimg = np.frombuffer(img, dtype=np.uint8)
         frame = cv.imdecode(npimg, 1)
 
+        end = time.time()
+        print("Dauer:", end - start)
+
         if msg.topic == MQTT_TOPIC_ORG:
             self.output_org = frame.copy()
-        elif msg.topic == MQTT_TOPIC_DELTA:
-            self.output_delta = frame.copy()
-        elif msg.topic == MQTT_TOPIC_DETECT:
-            self.output_detect = frame.copy()
-        elif msg.topic == MQTT_TOPIC_THRESH:
-            self.output_thresh = frame.copy()
+
+    
+    def on_boxes(self, payload):
+        start = time.time()
+        print("Decode")
+        utf = payload.decode("utf-8","ignore")
+        # print(payload)
+        obj = json.loads(utf)
+        print(obj["boxes"])
+        end = time.time()
+        print("decode end:", end - start)
 
     def on_connect(self, client, userdata, flags, rc):
-        global MQTT_TOPIC_ORG, MQTT_TOPIC_DELTA, MQTT_TOPIC_DETECT, MQTT_TOPIC_THRESH
+        global MQTT_TOPIC_ORG, MQTT_TOPIC_DELTA, MQTT_TOPIC_DETECT, MQTT_TOPIC_THRESH, MQTT_TOPIC_BOXES
         print("Connect")
         client.subscribe(MQTT_TOPIC_ORG)
-        client.subscribe(MQTT_TOPIC_DELTA)
-        client.subscribe(MQTT_TOPIC_DETECT)
-        client.subscribe(MQTT_TOPIC_THRESH)
     
     def get_org(self):
         return self.output_org

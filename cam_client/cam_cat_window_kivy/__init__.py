@@ -2,6 +2,7 @@ from threading import Thread
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.image import Image
+from kivy.uix.button import Button
 from kivy.clock import Clock
 from kivy.graphics.texture import Texture
 from kivy.uix.gridlayout import GridLayout
@@ -32,6 +33,10 @@ class CamCatWindowKivy(App):
         self.label_detect = None
         self.label_delta = None
         self.label_thresh = None
+    
+    def on_calibrate(self, instance):
+        print("Send Calibrate")
+        self.cam_client.send_calibrate()
 
     def build(self):
         layout = GridLayout(cols = 2)
@@ -39,6 +44,8 @@ class CamCatWindowKivy(App):
         layout.add_widget(KivyLiveImage(get_image_function=self.cam_client.get_detect))
         layout.add_widget(KivyLiveImage(get_image_function=self.cam_client.get_delta))
         layout.add_widget(KivyLiveImage(get_image_function=self.cam_client.get_thresh))
+
+        layout.add_widget(Button(text="Calibrate", size=(100,50), size_hint=(None, None), on_press=self.on_calibrate))
         return layout
 
     
