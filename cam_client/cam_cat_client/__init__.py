@@ -16,13 +16,14 @@ MQTT_TOPIC_CALIBRATE = MQTT_DOOR_PREFIX + "/door/calibrate"
 
 class CamCatClient:
 
-    def __init__(self, mqtt_broker):
+    def __init__(self, mqtt_broker, detection_processor):
         self.mqtt_broker = mqtt_broker
         self.output_org = None
         self.output_delta = None
         self.output_detect = None
         self.output_thresh = None
         self.client = None
+        self.detect_processor = detection_processor
 
     def start(self):
         client = mqtt.Client()
@@ -36,27 +37,27 @@ class CamCatClient:
         self.client.loop_stop()
 
     def send_calibrate(self):
-        global MQTT_TOPIC_CALIBRATE
-        self.client.publish(MQTT_TOPIC_CALIBRATE, None)
+        self.detect_processor.calibrate(self.output_org)
 
     def on_message(self, client, userdata, msg):
         global MQTT_TOPIC_ORG, MQTT_TOPIC_DELTA, MQTT_TOPIC_DETECT, MQTT_TOPIC_THRESH, MQTT_TOPIC_BOXES
 
         start = time.time()
-        if msg.topic == MQTT_TOPIC_BOXES:
-            self.on_boxes(msg.payload)
-            return
-        
         img = base64.b64decode(msg.payload)
         npimg = np.frombuffer(img, dtype=np.uint8)
         frame = cv.imdecode(npimg, 1)
 
-        end = time.time()
-        print("Dauer:", end - start)
 
         if msg.topic == MQTT_TOPIC_ORG:
             self.output_org = frame.copy()
+            self.process_img(frame)
 
+        end = time.time()
+        print("Dauer:", end - start)
+
+    def process_img(self, img):
+        rects, self.output_detect, self.output_delta, self.output_thresh = self.detect_processor.detect(img)
+        pass
     
     def on_boxes(self, payload):
         start = time.time()
