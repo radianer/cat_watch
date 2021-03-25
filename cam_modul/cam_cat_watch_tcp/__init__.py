@@ -6,6 +6,8 @@ import base64
 import time
 import numpy as np
 import socket
+import pickle
+import struct
 
 class CamCatWatchTCP:
     
@@ -17,7 +19,7 @@ class CamCatWatchTCP:
         self.server_port = server_port
 
         self.running = True
-        self.socket = socket.socket()
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.last_frame = None
         self.calibrate = True
 
@@ -32,7 +34,7 @@ class CamCatWatchTCP:
         cap.set(cv.CAP_PROP_FRAME_HEIGHT, self.resolution[1])
         
         print("Init")
-        for i in range(10):
+        for i in range(5):
             print(str(i) + " init frame")
             ret, frame = cap.read()
             time.sleep(1)
@@ -50,7 +52,7 @@ class CamCatWatchTCP:
             self.send_img(frame.copy())
             end = time.time()
             print("Dauer:", end - start)
-            time.sleep(1)
+            time.sleep(10)
     
     def stop(self):
         self.running = False
@@ -59,6 +61,10 @@ class CamCatWatchTCP:
         ret, buffer = cv.imencode(".jpg", frame)
         if not ret:
             print("Fail to encode")
-        jpg_base = base64.b64encode(buffer)
-        self.socket.send(jpg_base)
+        data = pickle.dumps(buffer, 0)
+        size = len(data)
+        self.socket.sendall(struct.pack(">L", size) + data)
+        # jpg_base = base64.b64encode(buffer)
+        # self.socket.send(jpg_base)
+
         
