@@ -15,7 +15,7 @@ MQTT_TOPIC_THRESH = MQTT_DOOR_PREFIX + "/door/thresh"
 MQTT_TOPIC_BOXES = MQTT_DOOR_PREFIX + "/door/boxes"
 MQTT_TOPIC_CALIBRATE = MQTT_DOOR_PREFIX + "/door/calibrate"
 
-class CamCatWatch:
+class CamCatWatchMQTT:
     
     def __init__(self, cam_id, resolution, mqtt_broker, min_area):
         self.cam_id = cam_id
