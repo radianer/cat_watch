@@ -26,6 +26,14 @@
             "cwd": "${workspaceFolder}/cam_client",
             "program": "${workspaceFolder}/cam_client/main.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: server",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/cam_server",
+            "program": "${workspaceFolder}/cam_server/main.py",
+            "console": "integratedTerminal"
         }
     ]
 }
