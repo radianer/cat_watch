@@ -20,16 +20,25 @@ class Server:
 
     def start(self):
         print("Server started")
+        # self.input_server = socketserver.TCPServer((self.hostname, self.input_port), TCPInputHandler)
         self.input_server = socketserver.TCPServer((self.hostname, self.input_port), TCPInputHandler)
-        self.input_server.timeout = 15
-        self.output_server = socketserver.TCPServer((self.hostname, self.output_port), TCPOutputHandler)
         self.input_serve_th = threading.Thread(target=self.input_server.serve_forever)
-        self.output_serve_th = threading.Thread(target=self.output_server.serve_forever)
-        for t in self.input_serve_th, self.output_serve_th: t.start()
-        for t in self.input_serve_th, self.output_serve_th: t.join()
+        self.input_serve_th.start()
+        # self.output_server = socketserver.TCPServer((self.hostname, self.output_port), TCPOutputHandler)
+        # self.output_serve_th = threading.Thread(target=self.output_server.serve_forever)
+        # for t in self.input_serve_th, self.output_serve_th: t.start()
+        # for t in self.input_serve_th, self.output_serve_th: t.join()
+    
+    def start_server(self, server):
+        while self.running:
+            server.handle_request()
         
 
-class TCPInputHandler(socketserver.BaseRequestHandler):
+class TCPInputHandler(socketserver.StreamRequestHandler):
+    timeout = 10
+
+    def __init__(self, request, client_address, server):
+        super().__init__(request, client_address, server)
 
     def handle(self):
         print("Get Input connection")
@@ -74,3 +83,13 @@ class TCPOutputHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         print("Get Output connection")
+
+
+class CatTCPServer(socketserver.TCPServer):
+
+    def __init__(self, server_address, RequestHandlerClass, bind_and_activate=True):
+        self.timeout = 10
+        super().__init__(server_address, RequestHandlerClass, bind_and_activate=bind_and_activate)
+
+    def handle_timeout(self):
+        print("Timeout")
