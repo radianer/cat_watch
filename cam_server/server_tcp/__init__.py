@@ -7,7 +7,7 @@ import cv2 as cv
 
 class Server:
 
-    def __init__(self, input_port, output_port, hostname = "192.168.178.32"):
+    def __init__(self, input_port, output_port, hostname = "192.168.178.40"):
         self.input_port = input_port
         self.output_port = output_port
         self.input_server = None
@@ -22,7 +22,8 @@ class Server:
         print("Server started")
         # self.input_server = socketserver.TCPServer((self.hostname, self.input_port), TCPInputHandler)
         self.input_server = socketserver.TCPServer((self.hostname, self.input_port), TCPInputHandler)
-        self.input_serve_th = threading.Thread(target=self.input_server.serve_forever)
+        # self.input_serve_th = threading.Thread(target=self.input_server.serve_forever)
+        self.input_serve_th = threading.Thread(target=self.start_server, args=(self.input_server,))
         self.input_serve_th.start()
         # self.output_server = socketserver.TCPServer((self.hostname, self.output_port), TCPOutputHandler)
         # self.output_serve_th = threading.Thread(target=self.output_server.serve_forever)
@@ -34,7 +35,7 @@ class Server:
             server.handle_request()
         
 
-class TCPInputHandler(socketserver.StreamRequestHandler):
+class TCPInputHandler(socketserver.BaseRequestHandler):
     timeout = 10
 
     def __init__(self, request, client_address, server):
@@ -48,6 +49,7 @@ class TCPInputHandler(socketserver.StreamRequestHandler):
             while len(data) < payload_size:
                 # data = self.request.recv(4096)
                 pay_data = self.request.recv(4096)
+                # pay_data = self.rfile.read(4096)
                 if pay_data is None:
                     break
                 data += pay_data
@@ -61,6 +63,7 @@ class TCPInputHandler(socketserver.StreamRequestHandler):
             while len(data) < msg_size:
                 # data = self.request.recv(4096)
                 msg_data = self.request.recv(4096)
+                # msg_data = self.rfile.read(4096)
                 if msg_data is None:
                     break
                 data += msg_data
